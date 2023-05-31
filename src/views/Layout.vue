@@ -19,8 +19,8 @@
             搜索<span class="iconfont icon-search" />
           </el-button>
           <el-button-group :style="{ 'margin-left': '10px' }">
-            <el-button type="primary" @click="login" plain>登录</el-button>
-            <el-button type="primary" @click="" plain>注册</el-button>
+            <el-button type="primary" @click="loginRegister(1)" plain>登录</el-button>
+            <el-button type="primary" @click="loginRegister(0)" plain>注册</el-button>
           </el-button-group>
         </div>
       </div>
@@ -32,10 +32,13 @@
       <router-view />
       <!-- <div v-for="item in 100">{{ item }}</div> -->
     </div>
+    <!-- 登录注册 -->
+    <LoginAndRegister ref="loginRegisterRef"></LoginAndRegister>
   </div>
 </template>
 
 <script setup>
+import LoginAndRegister from "./LoginAndRegister.vue";
 import { ref, reactive, getCurrentInstance, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 const { proxy } = getCurrentInstance();
@@ -85,15 +88,17 @@ const initScroll = () => {
   })
 }
 
-const showDialog = ref(true)
+const showDialog = ref(false)
 
 const buttons = [{
   text: "确定",
   type: 'primary',
 }]
 
-const login = () => {
-  showDialog.value = true;
+// 登录注册
+const loginRegisterRef = ref();
+const loginRegister = (type) => {
+  loginRegisterRef.value.showPanel(type)
 }
 
 onMounted(() => {

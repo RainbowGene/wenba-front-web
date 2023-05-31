@@ -70,7 +70,7 @@ const close = () => {
         border-bottom: 1px solid #ddd;
         padding: 15px;
         min-height: 100px;
-        max-height: calc(100vh - 250px);
+        max-height: calc(100vh - 100px);
         overflow: auto;
     }
 
