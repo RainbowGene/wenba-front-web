@@ -110,7 +110,11 @@
                     <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">去登陆</a>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" class="op-btn" @click="">{{ dialogConfig.title }}</el-button>
+                    <el-button type="primary" class="op-btn" @click="doSubmit">
+                        <span v-if="opType == 1">登 录</span>
+                        <span v-if="opType == 0">注 册</span>
+                        <span v-if="opType == 2">重置密码</span>
+                    </el-button>
                 </el-form-item>
             </el-form>
 
@@ -146,7 +150,11 @@ const router = useRouter();
 const route = useRoute();
 
 const api = {
-    checkCode: "/api/checkCode"
+    checkCode: "/api/checkCode",
+    sendMailCode: "/sendEmailCode",
+    register: "/register",
+    login: "/login",
+    resetPwd: "/resetPwd",
 }
 
 // 0 注册  1 登录  2 找回密码
@@ -211,11 +219,26 @@ const showSendMailDialog = () => {
 
 // 发送邮件
 const sendEmailCode = () => {
-    formData4SendMailCodeRef.value.validate((valid) => {
-        if(!valid) return;
-        console.log("请求后台发送验证码");
-    })
-}
+    formData4SendMailCodeRef.value.validate(async (valid) => {
+        if (!valid) {
+            return;
+        }
+        const params = Object.assign({}, formData4SendMailCode.value);
+        params.type = opType.value == 0 ? 0 : 1;
+        let result = await proxy.Request({
+            url: api.sendMailCode,
+            params: params,
+            errorCallback: () => {
+                changeCheckCode(1);
+            },
+        });
+        if (!result) {
+            return;
+        }
+        proxy.Message.success("验证码发送成功，请登录邮箱查看");
+        dialogConfig4SendMailCode.show = false;
+    });
+};
 
 //登录，注册 弹出配置
 const dialogConfig = reactive({
@@ -262,6 +285,45 @@ const resetForm = () => {
     nextTick(() => {
         changeCheckCode(0)  // 刷新验证码
         formDataRef.value.resetFields()
+    })
+}
+
+// 登录/注册/重置密码 提交表单
+const doSubmit = () => {
+    formDataRef.value.validate(async (valid) => {
+        if (!valid) return;
+        let params = {};
+        Object.assign(params, formData.value);
+        // 注册
+        if (opType.value == 0) {
+            params.password = params.reRegisterPassword;
+            delete params.reRegisterPassword
+            delete params.registerPassword
+        }
+        let url = null;
+        if (opType.value == 0) {
+            url = api.register
+        } else if (opType.value == 1) {
+            url = api.login
+        } else if (opType.value == 2) {
+            url = api.resetPwd
+        }
+        let result = await proxy.Request({
+            url, params,
+            errorCallback: () => {
+                changeCheckCode(0)
+            }
+        })
+
+        if (!result) return;
+        // 注册返回
+        if (opType.value == 0) {
+            proxy.Message.success('注册成功，请登录')
+            showPanel(1)
+        }
+        else if (opType.value == 1) {
+
+        }
     })
 }
 

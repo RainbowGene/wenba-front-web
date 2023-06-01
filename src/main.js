@@ -15,6 +15,8 @@ import '@/assets/icon/iconfont.css'
 import Dialog from "@/components/Dialog.vue"
 // 全局方法
 import Verify from "@/utils/Verify"
+import Message from "@/utils/Message"
+import Request from "@/utils/Request"
 
 const app = createApp(App)
 
@@ -23,6 +25,8 @@ app.use(ElementPlus);
 app.config.globalProperties.VueCookies = VueCookies;  // 全局cookie
 
 app.config.globalProperties.Verify = Verify;
+app.config.globalProperties.Message = Message;
+app.config.globalProperties.Request = Request;
 
 app.config.globalProperties.globalInfo = {  // 全局常量
     bodyWidth: 1300,
