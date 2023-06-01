@@ -19,15 +19,12 @@
             搜索<span class="iconfont icon-search" />
           </el-button>
           <el-button-group :style="{ 'margin-left': '10px' }">
-            <el-button type="primary" @click="loginRegister(1)" plain>登录</el-button>
-            <el-button type="primary" @click="loginRegister(0)" plain>注册</el-button>
+            <el-button type="primary" @click="loginAndRegister(1)" plain>登录</el-button>
+            <el-button type="primary" @click="loginAndRegister(0)" plain>注册</el-button>
           </el-button-group>
         </div>
       </div>
     </div>
-    <Dialog :show="showDialog" :buttons="buttons" @close="showDialog = false">
-      我是内容
-    </Dialog>
     <div class="body-content" style="padding-top: 60px;">
       <router-view />
       <!-- <div v-for="item in 100">{{ item }}</div> -->
@@ -97,7 +94,7 @@ const buttons = [{
 
 // 登录注册
 const loginRegisterRef = ref();
-const loginRegister = (type) => {
+const loginAndRegister = (type) => {
   loginRegisterRef.value.showPanel(type)
 }
 
