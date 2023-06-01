@@ -285,6 +285,7 @@ const resetForm = () => {
     nextTick(() => {
         changeCheckCode(0)  // 刷新验证码
         formDataRef.value.resetFields()
+        formData.value = {}
     })
 }
 
@@ -295,7 +296,7 @@ const doSubmit = () => {
         let params = {};
         Object.assign(params, formData.value);
         // 注册
-        if (opType.value == 0) {
+        if (opType.value == 0 || opType.value == 2) {
             params.password = params.reRegisterPassword;
             delete params.reRegisterPassword
             delete params.registerPassword
@@ -308,6 +309,7 @@ const doSubmit = () => {
         } else if (opType.value == 2) {
             url = api.resetPwd
         }
+        console.log(url);
         let result = await proxy.Request({
             url, params,
             errorCallback: () => {
@@ -316,13 +318,16 @@ const doSubmit = () => {
         })
 
         if (!result) return;
-        // 注册返回
-        if (opType.value == 0) {
+        if (opType.value == 0) { // 注册返回
             proxy.Message.success('注册成功，请登录')
             showPanel(1)
         }
-        else if (opType.value == 1) {
+        else if (opType.value == 1) { // 登录返回
 
+        }
+        else if (opType.value == 2) { // 重置密码
+            proxy.Message.success('密码设置成功，请重新登录')
+            showPanel(1)
         }
     })
 }
