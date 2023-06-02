@@ -145,9 +145,12 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import md5 from "js-md5";
+import { useStore } from "vuex"
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
+const store = useStore();
 
 const api = {
     checkCode: "/api/checkCode",
@@ -286,6 +289,14 @@ const resetForm = () => {
         changeCheckCode(0)  // 刷新验证码
         formDataRef.value.resetFields()
         formData.value = {}
+
+        // 登录
+        if (opType.value == 1) {
+            const cookieLoginInfo = proxy.VueCookies.get("loginInfo")
+            if (cookieLoginInfo) {
+                formData.value = cookieLoginInfo;
+            }
+        }
     })
 }
 
@@ -301,6 +312,14 @@ const doSubmit = () => {
             delete params.reRegisterPassword
             delete params.registerPassword
         }
+        // 登录
+        if (opType.value == 1) {
+            let cookieLoginInfo = proxy.VueCookies.get("loginInfo")
+            let cookiePasswrod = cookieLoginInfo == null ? null : cookieLoginInfo.password
+            if (params.password !== cookiePasswrod) {
+                params.password = md5(params.password)
+            }
+        }
         let url = null;
         if (opType.value == 0) {
             url = api.register
@@ -309,7 +328,6 @@ const doSubmit = () => {
         } else if (opType.value == 2) {
             url = api.resetPwd
         }
-        console.log(url);
         let result = await proxy.Request({
             url, params,
             errorCallback: () => {
@@ -323,7 +341,20 @@ const doSubmit = () => {
             showPanel(1)
         }
         else if (opType.value == 1) { // 登录返回
-
+            if (params.rememberMe) {
+                const loginInfo = {
+                    email: params.email,
+                    password: params.password,
+                    rememberMe: params.rememberMe,
+                }
+                proxy.VueCookies.set('loginInfo', loginInfo, "7d")
+            }
+            else {
+                proxy.VueCookies.remove('loginInfo')
+            }
+            dialogConfig.show = false
+            proxy.Message.success('登录成功！')
+            store.commit('updateLoginUserInfo', result.data)  // 更新
         }
         else if (opType.value == 2) { // 重置密码
             proxy.Message.success('密码设置成功，请重新登录')

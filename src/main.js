@@ -11,8 +11,11 @@ import 'element-plus/dist/index.css'
 import '@/assets/base.scss'
 //图标 图标在附件中
 import '@/assets/icon/iconfont.css'
+// vuex
+import store from "./store"
 // 全局组件
 import Dialog from "@/components/Dialog.vue"
+import Avatar from "@/components/Avatar.vue"
 // 全局方法
 import Verify from "@/utils/Verify"
 import Message from "@/utils/Message"
@@ -20,8 +23,9 @@ import Request from "@/utils/Request"
 
 const app = createApp(App)
 
-app.use(router)
+app.use(router);
 app.use(ElementPlus);
+app.use(store);
 app.config.globalProperties.VueCookies = VueCookies;  // 全局cookie
 
 app.config.globalProperties.Verify = Verify;
@@ -30,8 +34,10 @@ app.config.globalProperties.Request = Request;
 
 app.config.globalProperties.globalInfo = {  // 全局常量
     bodyWidth: 1300,
+    avatarUrl: "/api/file/getAvatar/"
 }
 
 app.component('Dialog', Dialog)
+app.component('Avatar', Avatar)
 
 app.mount('#app')
