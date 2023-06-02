@@ -16,6 +16,9 @@ import store from "./store"
 // 全局组件
 import Dialog from "@/components/Dialog.vue"
 import Avatar from "@/components/Avatar.vue"
+import Cover from "@/components/Cover.vue"
+import DataList from "@/components/DataList.vue"
+import NoData from "@/components/NoData.vue"
 // 全局方法
 import Verify from "@/utils/Verify"
 import Message from "@/utils/Message"
@@ -33,11 +36,15 @@ app.config.globalProperties.Message = Message;
 app.config.globalProperties.Request = Request;
 
 app.config.globalProperties.globalInfo = {  // 全局常量
-    bodyWidth: 1300,
-    avatarUrl: "/api/file/getAvatar/"
+    bodyWidth: 1100,
+    avatarUrl: "/api/file/getAvatar/",
+    imageUrl: "/api/file/getImage/"
 }
 
 app.component('Dialog', Dialog)
 app.component('Avatar', Avatar)
+app.component('Cover', Cover)
+app.component('DataList', DataList)
+app.component('NoData', NoData)
 
 app.mount('#app')

@@ -8,20 +8,20 @@
         </router-link>
         <!-- 板块 -->
         <div class="menu-panel">
-          <span :style="{ 'margin-left': '10px' }">全部</span>
+          <span :style="{ 'margin-left': '10px' }" to="/">首页</span>
           <template v-for="board in boardList">
             <el-popover v-if="board.children.length > 0" placement="bottom-start" title="" width="200" trigger="hover">
               <template #reference>
-                <span class="menu-item">{{ board.boardName }}</span>
+                <span class="menu-item" @click="boardClickHandle(board)">{{ board.boardName }}</span>
               </template>
               <!-- 二级板块 -->
               <div class="sub-board-list">
-                <span class="sub-board" v-for="subBoard in board.children">
+                <span class="sub-board" v-for="subBoard in board.children" @click="subBoardClickHandle(subBoard)">
                   {{ subBoard.boardName }}
                 </span>
               </div>
             </el-popover>
-            <span v-else class="menu-item">{{ board.boardName }}</span>
+            <span v-else class="menu-item" @click="boardClickHandle(board)">{{ board.boardName }}</span>
           </template>
         </div>
         <!-- 登录/注册/用户信息 -->
@@ -81,11 +81,10 @@
 <script setup>
 import LoginAndRegister from "./LoginAndRegister.vue";
 import { ref, reactive, getCurrentInstance, onMounted, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useStore } from "vuex"
 const { proxy } = getCurrentInstance();
 const router = useRouter();
-const route = useRoute();
 const store = useStore();
 
 const api = {
@@ -188,12 +187,24 @@ watch(() =>
       loginAndRegister(1);
     }
   }, { immediate: true, deep: true });
+
+// 板块点击
+const boardClickHandle = (board) => {
+  router.push(`/forum/${board.boardId}`)
+}
+
+// 二级板块点击
+const subBoardClickHandle = (subBoard) => {
+  router.push(`/forum/${subBoard.pBoardId}/${subBoard.boardId}`)
+}
+
 </script>
 
 <style lang="scss">
 .header {
   width: 100%;
   position: fixed;
+  top: 0px;
   box-shadow: 0 2px 6px 0;
   z-index: 1000;
 
@@ -263,5 +274,10 @@ watch(() =>
   .sub-board:hover {
     color: var(--link);
   }
+}
+
+.body-content {
+  position: relative;
+  margin-top: 60px;
 }
 </style>
