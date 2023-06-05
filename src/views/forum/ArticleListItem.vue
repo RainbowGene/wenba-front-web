@@ -9,13 +9,14 @@
           <div class="post-time">{{ data.postTime }}</div>
           <div class="address">&nbsp;·&nbsp;{{ data.userIpAddress }}</div>
           <el-divider direction="vertical" />
-          <router-link :to="'/'" class="link-info">{{ data.pBoardName }}</router-link>
+          <router-link :to="`/forum/${data.pBoardId}`" class="link-info">{{ data.pBoardName }}</router-link>
           <template v-if="data.boardName">
             <span>&nbsp;/&nbsp;</span>
-            <router-link :to="'/'" class="link-info">{{ data.boardName }}</router-link>
+            <router-link :to="`/forum/${data.pBoardId}/${data.boardId}`" class="link-info">{{ data.boardName
+            }}</router-link>
           </template>
         </div>
-        <router-link class="title" :to="'/'">
+        <router-link class="title" :to="`/post/${data.articleId}`">
           <span v-if="data.topType == 1" class="top">置顶</span>
           <span class="title-info">{{ data.title }}</span>
         </router-link>
@@ -27,7 +28,9 @@
         </div>
       </div>
       <!-- 封面 -->
-      <Cover v-if="data.cover" :cover="data.cover" :width="100"></Cover>
+      <RouterLink :to="`/post/${data.articleId}`">
+        <Cover v-if="data.cover" :cover="data.cover" :width="100"></Cover>
+      </RouterLink>
     </div>
   </div>
 </template>
@@ -90,6 +93,7 @@ const props = defineProps({
           border: 1px solid var(--pink);
           color: var(--pink);
           padding: 0 5px;
+          margin-right: 10px;
         }
       }
 
