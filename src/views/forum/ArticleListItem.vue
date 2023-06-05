@@ -15,7 +15,10 @@
             <router-link :to="'/'" class="link-info">{{ data.boardName }}</router-link>
           </template>
         </div>
-        <router-link class="title" :to="'/'">{{ data.title }}</router-link>
+        <router-link class="title" :to="'/'">
+          <span v-if="data.topType == 1" class="top">置顶</span>
+          <span class="title-info">{{ data.title }}</span>
+        </router-link>
         <div class="summary">{{ data.summary }}</div>
         <div class="article-info">
           <span class="iconfont icon-eye-solid">{{ data.readCount == 0 ? "阅读" : data.readCount }}</span>
@@ -44,11 +47,12 @@ const props = defineProps({
 
   .article-item-inner {
     border-bottom: 1px solid #ddd;
-    padding: 10px;
+    padding: 10px 3px;
     display: flex;
 
     .article-body {
       flex: 1;
+
       .user-info {
         display: flex;
         align-items: center;
@@ -78,6 +82,15 @@ const props = defineProps({
         font-size: 18px;
         margin: 10px 0;
         display: inline-block;
+
+        .top {
+          font-weight: normal;
+          font-size: 12px;
+          border-radius: 5px;
+          border: 1px solid var(--pink);
+          color: var(--pink);
+          padding: 0 5px;
+        }
       }
 
       .summary {

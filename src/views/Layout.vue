@@ -8,20 +8,26 @@
         </router-link>
         <!-- 板块 -->
         <div class="menu-panel">
-          <span :style="{ 'margin-left': '10px' }" to="/">首页</span>
+          <router-link :class="['menu-item home', activePboardId == undefined ? 'active' : '']"
+            :style="{ 'margin-left': '10px' }" to="/">首页</router-link>
           <template v-for="board in boardList">
             <el-popover v-if="board.children.length > 0" placement="bottom-start" title="" width="200" trigger="hover">
               <template #reference>
-                <span class="menu-item" @click="boardClickHandle(board)">{{ board.boardName }}</span>
+                <span :class="['menu-item', board.boardId == activePboardId ? 'active' : '']"
+                  @click="boardClickHandle(board)">{{
+                    board.boardName }}</span>
               </template>
               <!-- 二级板块 -->
               <div class="sub-board-list">
-                <span class="sub-board" v-for="subBoard in board.children" @click="subBoardClickHandle(subBoard)">
+                <span :class="['sub-board', subBoard.boardId == activeBoardId ? 'active' : '']"
+                  v-for="subBoard in board.children" @click="subBoardClickHandle(subBoard)">
                   {{ subBoard.boardName }}
                 </span>
               </div>
             </el-popover>
-            <span v-else class="menu-item" @click="boardClickHandle(board)">{{ board.boardName }}</span>
+            <!-- 没有二级板块的板块 -->
+            <span v-else :class="['menu-item', board.boardId == activePboardId ? 'active' : '']"
+              @click="boardClickHandle(board)">{{ board.boardName }}</span>
           </template>
         </div>
         <!-- 登录/注册/用户信息 -->
@@ -162,7 +168,8 @@ const loadBoard = async () => {
     url: api.loadBoard
   });
   if (!result) return;
-  boardList.value = result.data
+  boardList.value = result.data;
+  store.commit('saveBoardList', result.data)
 }
 
 loadBoard();
@@ -198,6 +205,21 @@ const subBoardClickHandle = (subBoard) => {
   router.push(`/forum/${subBoard.pBoardId}/${subBoard.boardId}`)
 }
 
+// 当前选中的板块
+const activePboardId = ref(0)
+watch(() => store.state.activePboardId,
+  (newVal, oldVal) => {
+    if (newVal !== 0) { // 点击首页时 newVal 为 undefined
+      activePboardId.value = newVal;
+    }
+  }, { immediate: true, deep: true });
+
+const activeBoardId = ref(0)
+watch(() => store.state.activeBoardId,
+  (newVal, oldVal) => {
+    activeBoardId.value = newVal;
+  }, { immediate: true, deep: true });
+
 </script>
 
 <style lang="scss">
@@ -227,6 +249,15 @@ const subBoardClickHandle = (subBoard) => {
       .menu-item {
         margin-left: 20px;
         cursor: pointer;
+      }
+
+      .home {
+        text-decoration: none;
+        color: #000;
+      }
+
+      .active {
+        color: var(--link)
       }
     }
 
@@ -272,6 +303,10 @@ const subBoardClickHandle = (subBoard) => {
   }
 
   .sub-board:hover {
+    color: var(--link);
+  }
+
+  .active {
     color: var(--link);
   }
 }
