@@ -40,34 +40,66 @@
             :style="{ width: proxy.globalInfo.bodyWidth - 300 + 'px' }">
             <div class="title">附件</div>
             <div class="attachment-info">
-                <div class="iconfont icon-zip"></div>
-                <div class="file-name">{{ attachment.fileName }}</div>
-                <div class="size">{{ attachment.fileSize }}</div>
-                <div>需要
+                <div class="iconfont icon-zip item"></div>
+                <div class="file-name item">{{ attachment.fileName }}</div>
+                <div class="size item">{{ proxy.Utils.sizeToStr(attachment.fileSize) }}</div>
+                <div class="item">需要
                     <span class="integral">{{ attachment.integral }}</span>积分
                 </div>
-                <div class="download-count">已下载{{ attachment.downloadCount }}次</div>
-                <div class="download-btn">
-                    <el-button type="primary" size="small">下载</el-button>
+                <div class="download-count item">已下载{{ attachment.downloadCount }}次</div>
+                <div class="download-btn item">
+                    <el-button type="primary" size="small" @click="downloadAttachment(attachment.fileId)">下载</el-button>
                 </div>
             </div>
         </div>
+        <!-- 评论 -->
+        <div class="comment-panel" id="view-comment"></div>
+    </div>
+    <!-- 左侧快捷操作 -->
+    <div class="quick-panel" :style="{ left: quickPanelLeft + 'px' }">
+        <!-- 点赞 -->
+        <el-badge :value="articleInfo.goodCount" type="info" :hidden="!articleInfo.goodCount > 0">
+            <div class="quick-item" @click="doLikeHandle">
+                <span :class="['iconfont icon-good', haveLike ? 'have-like' : '']"></span>
+            </div>
+        </el-badge>
+        <!-- 评论 -->
+        <el-badge :value="articleInfo.goodComment" type="info" :hidden="!articleInfo.goodComment > 0">
+            <div class="quick-item" @click="goToPosition('view-comment')">
+                <span class="iconfont icon-comment"></span>
+            </div>
+        </el-badge>
+        <!-- 附件 -->
+        <div class="quick-item" @click="goToPosition('view-attachment')">
+            <span class="iconfont icon-attachment"></span>
+        </div>
+        <!-- 图片预览 -->
+        <ImageViewer ref="imageViewerRef" :imageList="previewImgList"></ImageViewer>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, onMounted } from "vue";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-light.css"; //样式
+import { ref, getCurrentInstance, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useStore } from "vuex"
 const { proxy } = getCurrentInstance();
+const store = useStore();
 const router = useRouter();
 const route = useRoute();
 
 const api = {
-    getArticleDetail: '/forum/getArticleDetail'
+    getArticleDetail: '/forum/getArticleDetail', // 文章详情
+    doLike: '/forum/doLike', // 点赞
+    getUserDownloadInfo: "/forum/getUserDownloadInfo", // 获取积分
+    attachmentDownload: '/api/forum/attachmentDownload',  // 下载:在新窗口打开需要前缀 /api
 }
 
 const articleInfo = ref({}) // 文章详情
 const attachment = ref({}) // 附件
+const haveLike = ref(false) // 是否已经点赞
+const currentUserInfo = ref({}); // 当前用户信息
 const getArticleDetail = async (articleId) => {
     let result = await proxy.Request({
         url: api.getArticleDetail,
@@ -79,11 +111,123 @@ const getArticleDetail = async (articleId) => {
     if (!result) return;
     articleInfo.value = result.data.forumArticle;
     attachment.value = result.data.attachment;
+    haveLike.value = result.data.haveLike;
+
+    imagePreview(); // 图片预览
+    highlightCode(); // 代码高亮
+}
+
+// 评论 附件 定位
+const goToPosition = (domId) => {
+    document.querySelector('#' + domId).scrollIntoView();
+}
+
+// 点赞文章
+const doLikeHandle = async () => {
+    if (!store.getters.getLoginUserInfo) { // 是否登录验证,实际上后台也会给901超时，出登录弹窗
+        return store.commit('showLogin', true)
+    }
+    let result = await proxy.Request({
+        url: api.doLike,
+        params: {
+            articleId: articleInfo.value.articleId
+        }
+    })
+    if (!result) return
+    haveLike.value = !haveLike.value;
+    let goodCount = 1;
+    if (!haveLike.value) {
+        goodCount = -1
+    }
+    articleInfo.value.goodCount = articleInfo.value.goodCount + goodCount
 }
 
 onMounted(() => {
     getArticleDetail(route.params.articleId);
 })
+
+// 快捷操作
+const quickPanelLeft = (window.innerWidth - proxy.globalInfo.bodyWidth) / 2 - 120;
+
+//下载附件
+const downloadAttachment = async (fileId) => {
+    if (!currentUserInfo.value) {
+        store.commit("showLogin", true);
+        return;
+    }
+    // 0积分 不需要判断
+    if (
+        attachment.value.integral == 0 ||
+        currentUserInfo.value.userId == articleInfo.value.userId
+    ) {
+        downloadDo(fileId);
+        return;
+    }
+
+    //获取用户下载信息
+    let result = await proxy.Request({
+        url: api.getUserDownloadInfo,
+        params: {
+            fileId: fileId,
+        },
+    });
+    if (!result) {
+        return;
+    }
+    //已下载过再次下载不需要积分
+    if (result.data.haveDownload) {
+        downloadDo(fileId);
+        return;
+    }
+
+    //判断用户积分是否够
+    if (result.data.userIntegral < attachment.value.integral) {
+        proxy.Message.warning("你的积分不够，无法下载");
+        return;
+    }
+
+    proxy.Confirm(
+        `你还有${result.data.userIntegral}积分，当前下载会扣除${attachment.value.integral}积分，确定要下载吗？`,
+        () => {
+            downloadDo(fileId);
+        }
+    );
+};
+
+const downloadDo = (fileId) => {
+    document.location.href = api.attachmentDownload + "?fileId=" + fileId;
+    attachment.value.downloadCount = attachment.value.downloadCount + 1;
+};
+
+//文章图片预览
+const imageViewerRef = ref(null);
+const previewImgList = ref([]);
+const imagePreview = () => {
+    nextTick(() => {
+        const imageNodeList = document
+            .querySelector("#detail")
+            .querySelectorAll("img");
+        const imageList = [];
+        imageNodeList.forEach((item, index) => {
+            const src = item.getAttribute("src");
+            imageList.push(src);
+            item.addEventListener("click", () => {
+                imageViewerRef.value.show(index);
+            });
+        });
+        previewImgList.value = imageList;
+    });
+};
+
+// 代码高亮
+const highlightCode = () => {
+    nextTick(() => {
+        let blocks = document.querySelectorAll("pre code");
+        blocks.forEach((item) => {
+            hljs.highlightBlock(item);
+        });
+    });
+};
 </script>
 
 <style lang="scss">
@@ -171,6 +315,64 @@ onMounted(() => {
         .attachment-info {
             display: flex;
             align-items: center;
+            color: #9f9f9f;
+            margin-top: 10px;
+
+            .item {
+                margin-right: 10px;
+            }
+
+            .iconfont {
+                font-size: 20px;
+                color: #6caef7;
+            }
+
+            .file-name {
+                color: #6caef7;
+            }
+
+            .integral {
+                color: red;
+                padding: 0 5px;
+            }
+        }
+    }
+
+    .comment-panel {
+        margin-top: 20px;
+        background: #fff;
+    }
+}
+
+.quick-panel {
+    position: absolute;
+    width: 50px;
+    top: 200px;
+    text-align: center;
+
+    .el-badge__content.is-fixed {
+        top: 5px;
+        right: 15px;
+    }
+
+    .quick-item {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #fff;
+        margin-bottom: 30px;
+        cursor: pointer;
+
+        .iconfont {
+            font-size: 18px;
+            color: var(--text2);
+        }
+
+        .have-like {
+            color: red;
         }
     }
 }

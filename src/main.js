@@ -19,10 +19,13 @@ import Avatar from "@/components/Avatar.vue"
 import Cover from "@/components/Cover.vue"
 import DataList from "@/components/DataList.vue"
 import NoData from "@/components/NoData.vue"
-// 全局方法
+import ImageViewer from "@/components/ImageViewer.vue"
+// 引入全局方法
 import Verify from "@/utils/Verify"
 import Message from "@/utils/Message"
 import Request from "@/utils/Request"
+import Utils from "@/utils/Utils"
+import Confirm from "@/utils/Confirm"
 
 const app = createApp(App)
 
@@ -31,9 +34,12 @@ app.use(ElementPlus);
 app.use(store);
 app.config.globalProperties.VueCookies = VueCookies;  // 全局cookie
 
+// 挂载全局方法
 app.config.globalProperties.Verify = Verify;
 app.config.globalProperties.Message = Message;
 app.config.globalProperties.Request = Request;
+app.config.globalProperties.Utils = Utils;
+app.config.globalProperties.Confirm = Confirm;
 
 app.config.globalProperties.globalInfo = {  // 全局常量
     bodyWidth: 1100,
@@ -46,5 +52,6 @@ app.component('Avatar', Avatar)
 app.component('Cover', Cover)
 app.component('DataList', DataList)
 app.component('NoData', NoData)
+app.component('ImageViewer', ImageViewer)
 
 app.mount('#app')

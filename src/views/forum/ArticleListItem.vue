@@ -98,7 +98,7 @@ const props = defineProps({
       }
 
       .summary {
-        width: 85%;
+        width: 65%;
         font-size: 14px;
         color: #86909c;
         /*让长段文本不换行*/
