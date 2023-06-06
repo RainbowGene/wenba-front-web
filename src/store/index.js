@@ -2,18 +2,27 @@ import { createStore } from "vuex";
 
 export default createStore({
     state: {
-        loginUserInfo: null, // 用户信息
-        showLogin: false, // 是否弹出登录框
-        boardList: [], // 板块信息
-        activePboardId: 0, // 当前一级板块
-        activeBoardId: 0, // 当前二级板块
+        //用户信息
+        loginUserInfo: null,
+        //是否展示登录
+        showLogin: false,
+        //板块信息
+        boardList: [],
+        //当前一级板块
+        activePboardId: 0,
+        //当前二级板块
+        activeBoardId: 0,
+        //消息数量
+        messageCountInfo: {},
+        //系统设置
+        sysSetting: {},
     },
     getters: {
         getLoginUserInfo: (state) => {
             return state.loginUserInfo;
         },
         getBoardList: (state) => {
-            return state.boardList
+            return state.boardList;
         },
         getSubBoardList: (state) => (boardId) => {
             let board = state.boardList.find(item => {
@@ -21,32 +30,44 @@ export default createStore({
             })
             return board ? board.children : [];
         },
-        getActivePBoardId: (state) => {
+        getActivePboardId: (state) => {
             return state.activePboardId;
         },
         getActiveBoardId: (state) => {
             return state.activeBoardId;
-        }
+        },
+        getMessageCountInfo: (state) => {
+            return state.messageCountInfo;
+        },
     },
     mutations: {
-        updateLoginUserInfo: (state, value) => {
+        updateLoginUserInfo(state, value) {
             state.loginUserInfo = value;
         },
-        showLogin: (state, value) => {
-            state.showLogin = value
+        showLogin(state, value) {
+            state.showLogin = value;
         },
         saveBoardList(state, value) {
             state.boardList = value;
         },
-        setActivePBoardId(state, value) {
+        setActivePboardId: (state, value) => {
             state.activePboardId = value;
         },
-        setActiveBoardId(state, value) {
+        setActiveBoardId: (state, value) => {
             state.activeBoardId = value;
         },
+        //设置消息数
+        updateMessageCountInfo: (state, value) => {
+            state.messageCountInfo = value;
+        },
+        readMessage: (state, value) => {
+            state.messageCountInfo.total = state.messageCountInfo.total - state.messageCountInfo[value]
+            state.messageCountInfo[value] = 0;
+        },
+        saveSysSetting: (state, value) => {
+            state.sysSetting = value;
+        }
     },
-    actions: {
-
-    },
+    actions: {},
     modules: {}
 })

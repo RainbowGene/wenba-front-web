@@ -1,18 +1,16 @@
 <template>
     <div class="cover" :style="{ width: width + 'px', height: width + 'px' }">
-        <el-image :style="{ width: width + 'px', height: width + 'px' }" :src="proxy.globalInfo.imageUrl + cover"
-            fit="scale-down" :lazy="true">
-
+        <el-image :style="{ width: width + 'px', height: width + 'px' }" fit="scale-down" loading="lazy"
+            :src="cover ? proxy.globalInfo.imageUrl + cover : localCover">
         </el-image>
     </div>
 </template>
-
+  
 <script setup>
 import { getCurrentInstance } from "vue";
 const { proxy } = getCurrentInstance();
 
-// 用下面可以使用本地默认封面
-// const localCover = new URL('@/assets/default_cover.png', import.meta.url).href;   
+const localCover = new URL("@/assets/default_cover.png", import.meta.url).href;
 
 const props = defineProps({
     cover: {
@@ -20,11 +18,11 @@ const props = defineProps({
     },
     width: {
         type: Number,
-        default: 60
-    }
-})
+        default: 60,
+    },
+});
 </script>
-
+  
 <style lang="scss">
 .cover {
     background: #ddd;

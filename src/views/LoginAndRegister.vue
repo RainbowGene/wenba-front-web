@@ -2,96 +2,105 @@
     <div>
         <Dialog :show="dialogConfig.show" :title="dialogConfig.title" :buttons="dialogConfig.buttons" width="400px"
             :showCancel="false" @close="closeDialog">
-            <el-form class="login-register" :model="formData" ref="formDataRef" :rules="rules">
+            <el-form class="login-register" :model="formData" :rules="rules" ref="formDataRef">
+                <!--input输入-->
                 <el-form-item prop="email">
-                    <el-input v-model="formData.email" maxLength="150" placeholder="请输入邮箱" clearable size="large">
+                    <el-input size="large" clearable placeholder="请输入邮箱" v-model="formData.email" maxLength="150">
                         <template #prefix>
                             <span class="iconfont icon-account"></span>
                         </template>
                     </el-input>
                 </el-form-item>
-                <!-- 登录使用的密码框 -->
+                <!--登录密码-->
                 <el-form-item prop="password" v-if="opType == 1">
-                    <el-input v-model="formData.password" placeholder="请输入密码" clearable
-                        :type="passwordEyeType.passwordEyeOpen ? 'text' : 'password'" size="large">
+                    <el-input :type="passwordEyeType.passwordEyeOpen ? 'text' : 'password'" size="large" placeholder="请输入密码"
+                        v-model="formData.password">
                         <template #prefix>
                             <span class="iconfont icon-password"></span>
                         </template>
                         <template #suffix>
-                            <span @click="eyeChange('passwordEyeOpen')"
-                                :class="['iconfont', passwordEyeType.passwordEyeOpen ? 'icon-eye' : 'icon-close-eye']"></span>
+                            <span @click="eyeChange('passwordEyeOpen')" :class="[
+                                'iconfont',
+                                passwordEyeType.passwordEyeOpen
+                                    ? 'icon-eye'
+                                    : 'icon-close-eye',
+                            ]"></span>
                         </template>
                     </el-input>
                 </el-form-item>
-                <!-- 注册 -->
+                <!--注册-->
                 <div v-if="opType == 0 || opType == 2">
                     <el-form-item prop="emailCode">
-                        <div class="send-email-panel">
-                            <el-input v-model="formData.emailCode" placeholder="请输入邮箱验证码" clearable size="large">
+                        <div class="send-emali-panel">
+                            <el-input size="large" placeholder="请输入邮箱验证码" v-model="formData.emailCode">
                                 <template #prefix>
                                     <span class="iconfont icon-checkcode"></span>
                                 </template>
                             </el-input>
-                            <el-button class="send-email-btn" type="primary" size="large"
-                                @click="showSendMailDialog">获取验证码</el-button>
+                            <el-button class="send-mail-btn" type="primary" size="large"
+                                @click="getEmailCode">获取验证码</el-button>
                         </div>
-                        <el-popover placement="left" width="450" trigger="click">
+                        <el-popover placement="left" :width="500" trigger="click">
                             <div>
-                                <p>1,垃圾箱中查看</p>
-                                <p>2,在邮箱中头像->设置->反垃圾->白名单->设置邮件白名单</p>
-                                <p>3,将邮箱[1767386755@qq.com]添加到白名单</p>
-                                <!-- <a href="" target="_blank">不知道怎么设置？</a> -->
+                                <p>1、在垃圾箱中查找邮箱验证码</p>
+                                <p>2、在邮箱中头像->设置->反垃圾->白名单->设置邮件地址白名单</p>
+                                <p>
+                                    3、将邮箱【laoluo@wuhancoder.com】添加到白名单不知道怎么设置？
+                                </p>
                             </div>
                             <template #reference>
-                                <span class="a-link" :style="{ 'font-size': '14px' }">
-                                    未收到邮箱验证码？
-                                </span>
+                                <span class="a-link" :style="{ 'font-size': '14px' }">未收到邮箱验证码？</span>
                             </template>
                         </el-popover>
-
                     </el-form-item>
-                    <el-form-item v-if="opType == 0" prop="nickName">
-                        <el-input v-model="formData.nickName" placeholder="请输入昵称" maxLength="16" clearable size="large">
+                    <el-form-item prop="nickName" v-if="opType == 0">
+                        <el-input size="large" clearable placeholder="请输入昵称" v-model="formData.nickName" maxLength="20">
                             <template #prefix>
                                 <span class="iconfont icon-account"></span>
                             </template>
                         </el-input>
                     </el-form-item>
                     <el-form-item prop="registerPassword">
-                        <el-input v-model="formData.registerPassword"
-                            :type="passwordEyeType.registerPasswordEyeOpen ? 'text' : 'password'" placeholder="请输入密码"
-                            clearable size="large">
+                        <el-input :type="passwordEyeType.registerPasswordEyeOpen ? 'text' : 'password'
+                            " size="large" placeholder="请输入密码" v-model="formData.registerPassword">
                             <template #prefix>
                                 <span class="iconfont icon-password"></span>
                             </template>
                             <template #suffix>
-                                <span @click="eyeChange('registerPasswordEyeOpen')"
-                                    :class="['iconfont', passwordEyeType.registerPasswordEyeOpen ? 'icon-eye' : 'icon-close-eye']"></span>
+                                <span @click="eyeChange('registerPasswordEyeOpen')" :class="[
+                                    'iconfont',
+                                    passwordEyeType.registerPasswordEyeOpen
+                                        ? 'icon-eye'
+                                        : 'icon-close-eye',
+                                ]"></span>
                             </template>
                         </el-input>
                     </el-form-item>
                     <el-form-item prop="reRegisterPassword">
-                        <el-input v-model="formData.reRegisterPassword"
-                            :type="passwordEyeType.reRegisterPasswordEyeOpen ? 'text' : 'password'" placeholder="请确认密码"
-                            clearable size="large">
+                        <el-input :type="passwordEyeType.reRegisterPasswordEyeOpen ? 'text' : 'password'
+                            " size="large" placeholder="请再次输入密码" v-model="formData.reRegisterPassword">
                             <template #prefix>
                                 <span class="iconfont icon-password"></span>
                             </template>
                             <template #suffix>
-                                <span @click="eyeChange('reRegisterPasswordEyeOpen')"
-                                    :class="['iconfont', passwordEyeType.reRegisterPasswordEyeOpen ? 'icon-eye' : 'icon-close-eye']"></span>
+                                <span @click="eyeChange('reRegisterPasswordEyeOpen')" :class="[
+                                    'iconfont',
+                                    passwordEyeType.reRegisterPasswordEyeOpen
+                                        ? 'icon-eye'
+                                        : 'icon-close-eye',
+                                ]"></span>
                             </template>
                         </el-input>
                     </el-form-item>
                 </div>
                 <el-form-item prop="checkCode">
                     <div class="check-code-panel">
-                        <el-input v-model="formData.checkCode" placeholder="请输入验证码" clearable size="large">
+                        <el-input size="large" placeholder="请输入验证码" v-model="formData.checkCode" @keyup.enter="doSubmit">
                             <template #prefix>
                                 <span class="iconfont icon-checkcode"></span>
                             </template>
                         </el-input>
-                        <img :src="checkCodeUrl" class="check-code" @click="changeCheckCode(0)">
+                        <img :src="checkCodeUrl" class="check-code" @click="changeCheckCode(0)" />
                     </div>
                 </el-form-item>
                 <el-form-item v-if="opType == 1">
@@ -104,123 +113,125 @@
                     </div>
                 </el-form-item>
                 <el-form-item v-if="opType == 0">
-                    <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">已有账号</a>
+                    <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">已有账号?</a>
                 </el-form-item>
                 <el-form-item v-if="opType == 2">
-                    <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">去登陆</a>
+                    <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">去登录?</a>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" class="op-btn" @click="doSubmit">
-                        <span v-if="opType == 1">登 录</span>
-                        <span v-if="opType == 0">注 册</span>
+                        <span v-if="opType == 0">注册</span>
+                        <span v-if="opType == 1">登录</span>
                         <span v-if="opType == 2">重置密码</span>
                     </el-button>
                 </el-form-item>
             </el-form>
-
         </Dialog>
-        <!-- 邮箱验证码弹窗 -->
-        <Dialog :show="dialogConfig4SendMailCode.show" :titile="dialogConfig4SendMailCode.title"
+        <!--发送邮箱验证码-->
+        <Dialog :show="dialogConfig4SendMailCode.show" :title="dialogConfig4SendMailCode.title"
             :buttons="dialogConfig4SendMailCode.buttons" width="500px" :showCancel="false"
             @close="dialogConfig4SendMailCode.show = false">
-            <el-form :model="formData4SendMailCode" ref="formData4SendMailCodeRef" :rules="rules" label-width="80px">
+            <el-form :model="formData4SendMailCode" :rules="rules" ref="formData4SendMailCodeRef" label-width="80px">
                 <el-form-item label="邮箱">
                     {{ formData.email }}
                 </el-form-item>
                 <el-form-item label="验证码" prop="checkCode">
                     <div class="check-code-panel">
-                        <el-input v-model="formData4SendMailCode.checkCode" placeholder="请输入验证码" clearable size="large">
+                        <el-input size="large" placeholder="请输入验证码" v-model="formData4SendMailCode.checkCode">
                             <template #prefix>
                                 <span class="iconfont icon-checkcode"></span>
                             </template>
                         </el-input>
-                        <img :src="checkCodeUrl4SendMailCode" class="check-code" @click="changeCheckCode(1)">
+                        <img :src="checkCodeUrl4SendMailCode" class="check-code" @click="changeCheckCode(1)" />
                     </div>
                 </el-form-item>
             </el-form>
         </Dialog>
     </div>
 </template>
-
+  
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useStore } from "vuex";
 import md5 from "js-md5";
-import { useStore } from "vuex"
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
-
 const api = {
     checkCode: "/api/checkCode",
     sendMailCode: "/sendEmailCode",
     register: "/register",
     login: "/login",
     resetPwd: "/resetPwd",
-}
+};
 
-// 0 注册  1 登录  2 找回密码
-const opType = ref()
-
+// 0:注册 1:登录 2:重置密码
+const opType = ref();
 const showPanel = (type) => {
     opType.value = type;
     resetForm();
-}
+};
+defineExpose({ showPanel });
 
-defineExpose({ showPanel })
-
-// 验证码
-const checkCodeUrl4SendMailCode = ref(api.checkCode);
+//验证码
 const checkCodeUrl = ref(api.checkCode);
+const checkCodeUrl4SendMailCode = ref(api.checkCode);
 const changeCheckCode = (type) => {
     if (type == 0) {
-        checkCodeUrl.value = api.checkCode + '?type=' + type + "&time=" + new Date().getTime();
+        checkCodeUrl.value =
+            api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
+    } else {
+        checkCodeUrl4SendMailCode.value =
+            api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
     }
-    else { // 验证弹框的图片验证码
-        checkCodeUrl4SendMailCode.value = api.checkCode + '?type=' + type + "&time=" + new Date().getTime();
-    }
-}
+};
 
-// 密码显/隐藏
+//密码显示隐藏操作
 const passwordEyeType = reactive({
     passwordEyeOpen: false,
     registerPasswordEyeOpen: false,
     reRegisterPasswordEyeOpen: false,
-})
-
+});
 const eyeChange = (type) => {
     passwordEyeType[type] = !passwordEyeType[type];
-}
+};
 
-// 发送邮箱验证码弹窗
+//发送邮箱验证码弹窗
 const formData4SendMailCode = ref({});
 const formData4SendMailCodeRef = ref();
 const dialogConfig4SendMailCode = reactive({
     show: false,
-    title: '发送邮箱验证码',
-    buttons: [{
-        type: 'primary',
-        text: "发送验证码",
-        click: () => {
-            sendEmailCode()
-        }
-    }]
+    title: "发送邮箱验证码",
+    buttons: [
+        {
+            type: "primary",
+            text: "发送验证码",
+            click: () => {
+                sendEmailCode();
+            },
+        },
+    ],
 });
+//获取邮箱验证码
+const getEmailCode = () => {
+    formDataRef.value.validateField("email", (valid) => {
+        if (!valid) {
+            return;
+        }
+        dialogConfig4SendMailCode.show = true;
 
-const showSendMailDialog = () => {
-    formDataRef.value.validateField('email', (valid) => {
-        if (!valid) return;
-        dialogConfig4SendMailCode.show = true
         nextTick(() => {
             changeCheckCode(1);
-            formData4SendMailCodeRef.value.resetFields()
-            formData4SendMailCode.value = { email: formData.value.email }
-        })
-    })
-}
-
-// 发送邮件
+            formData4SendMailCodeRef.value.resetFields();
+            formData4SendMailCode.value = {
+                email: formData.value.email,
+            };
+        });
+    });
+};
+//发送邮件
 const sendEmailCode = () => {
     formData4SendMailCodeRef.value.validate(async (valid) => {
         if (!valid) {
@@ -246,139 +257,150 @@ const sendEmailCode = () => {
 //登录，注册 弹出配置
 const dialogConfig = reactive({
     show: false,
-    title: '标题',
+    title: "标题",
 });
 
 const checkRePassword = (rule, value, callback) => {
     if (value !== formData.value.registerPassword) {
-        callback(new Error(rule.message))
+        callback(new Error(rule.message));
+    } else {
+        callback();
     }
-    else {
-        callback()
-    }
-}
-
+};
 const formData = ref({});
 const formDataRef = ref();
 const rules = {
-    email: [{ required: true, message: '请输入邮箱' },
-    { validator: proxy.Verify.email, message: '请输入正确的邮箱地址' }],
-    password: [{ required: true, message: '请输入密码' }],
-    emailCode: [{ required: true, message: '请输入邮箱验证码' }],
-    nickName: [{ required: true, message: '请输入昵称' }],
-    registerPassword: [{ required: true, message: '请输入密码' },
-    { validator: proxy.Verify.password, message: '密码只能是数字/字母/特殊字符' }],
-    reRegisterPassword: [{ required: true, message: '请再次输入密码' },
-    { validator: checkRePassword, message: '两次输入密码不一致' }],
-    checkCode: [{ required: true, message: '请输入图形验证码' }],
-}
+    email: [
+        { required: true, message: "请输入邮箱" },
+        { validator: proxy.Verify.email, message: "请输入正确的邮箱" },
+    ],
+    password: [{ required: true, message: "请输入密码" }],
+    emailCode: [{ required: true, message: "请输入邮箱验证码" }],
+    nickName: [{ required: true, message: "请输入昵称" }],
+    registerPassword: [
+        { required: true, message: "请输入密码" },
+        {
+            validator: proxy.Verify.password,
+            message: "密码只能是数字，字母，特殊字符 8-18位",
+        },
+    ],
+    reRegisterPassword: [
+        { required: true, message: "请再次输入密码" },
+        {
+            validator: checkRePassword,
+            message: "两次输入的密码不一致",
+        },
+    ],
+    checkCode: [{ required: true, message: "请输入图片验证码" }],
+};
 
-// 重置表单
+//重置表单
 const resetForm = () => {
-    dialogConfig.show = true
+    dialogConfig.show = true;
     if (opType.value == 0) {
-        dialogConfig.title = '注 册'
-    }
-    else if (opType.value == 1) {
-        dialogConfig.title = '登 录'
-    }
-    else if (opType.value == 2) {
-        dialogConfig.title = '重置密码'
+        dialogConfig.title = "注册";
+    } else if (opType.value == 1) {
+        dialogConfig.title = "登录";
+    } else if (opType.value == 2) {
+        dialogConfig.title = "重置密码";
     }
     nextTick(() => {
-        changeCheckCode(0)  // 刷新验证码
-        formDataRef.value.resetFields()
-        formData.value = {}
+        changeCheckCode(0);
+        formDataRef.value.resetFields();
+        formData.value = {};
 
-        // 登录
+        //登录
         if (opType.value == 1) {
-            const cookieLoginInfo = proxy.VueCookies.get("loginInfo")
+            const cookieLoginInfo = proxy.VueCookies.get("loginInfo");
             if (cookieLoginInfo) {
                 formData.value = cookieLoginInfo;
             }
         }
-    })
-}
+    });
+};
 
-// 登录/注册/重置密码 提交表单
+// 登录、注册、重置密码  提交表单
 const doSubmit = () => {
     formDataRef.value.validate(async (valid) => {
-        if (!valid) return;
+        if (!valid) {
+            return;
+        }
         let params = {};
         Object.assign(params, formData.value);
-        // 注册
+        //注册
         if (opType.value == 0 || opType.value == 2) {
-            params.password = params.reRegisterPassword;
-            delete params.reRegisterPassword
-            delete params.registerPassword
+            params.password = params.registerPassword;
+            delete params.registerPassword;
+            delete params.reRegisterPassword;
         }
-        // 登录
+        //登录
         if (opType.value == 1) {
-            let cookieLoginInfo = proxy.VueCookies.get("loginInfo")
-            let cookiePasswrod = cookieLoginInfo == null ? null : cookieLoginInfo.password
-            if (params.password !== cookiePasswrod) {
-                params.password = md5(params.password)
+            let cookieLoginInfo = proxy.VueCookies.get("loginInfo");
+            let cookiePassword =
+                cookieLoginInfo == null ? null : cookieLoginInfo.password;
+            if (params.password !== cookiePassword) {
+                params.password = md5(params.password);
             }
         }
         let url = null;
         if (opType.value == 0) {
-            url = api.register
+            url = api.register;
         } else if (opType.value == 1) {
-            url = api.login
+            url = api.login;
         } else if (opType.value == 2) {
-            url = api.resetPwd
+            url = api.resetPwd;
         }
         let result = await proxy.Request({
-            url, params,
+            url: url,
+            params: params,
             errorCallback: () => {
-                changeCheckCode(0)
-            }
-        })
-
-        if (!result) return;
-        if (opType.value == 0) { // 注册返回
-            proxy.Message.success('注册成功，请登录')
-            showPanel(1)
+                changeCheckCode(0);
+            },
+        });
+        if (!result) {
+            return;
         }
-        else if (opType.value == 1) { // 登录返回
+        //注册返回
+        if (opType.value == 0) {
+            proxy.Message.success("注册成功,请登录");
+            showPanel(1);
+        } else if (opType.value == 1) {
+            //登录
             if (params.rememberMe) {
                 const loginInfo = {
                     email: params.email,
                     password: params.password,
                     rememberMe: params.rememberMe,
-                }
-                proxy.VueCookies.set('loginInfo', loginInfo, "7d")
+                };
+                proxy.VueCookies.set("loginInfo", loginInfo, "7d");
+            } else {
+                proxy.VueCookies.remove("loginInfo");
             }
-            else {
-                proxy.VueCookies.remove('loginInfo')
-            }
-            dialogConfig.show = false
-            proxy.Message.success('登录成功！')
-            store.commit('updateLoginUserInfo', result.data)  // 更新
+            dialogConfig.show = false;
+            proxy.Message.success("登录成功");
+            store.commit("updateLoginUserInfo", result.data);
+        } else if (opType.value == 2) {
+            //重置密码
+            proxy.Message.success("重置密码成功,请登录");
+            showPanel(1);
         }
-        else if (opType.value == 2) { // 重置密码
-            proxy.Message.success('密码设置成功，请重新登录')
-            showPanel(1)
-        }
-    })
-}
+    });
+};
 
 const closeDialog = () => {
-    dialogConfig.show = false
-    store.commit('showLogin', false)
-}
-
+    dialogConfig.show = false;
+    store.commit("showLogin", false);
+};
 </script>
-
+  
 <style lang="scss">
 .login-register {
-
-    .send-email-panel {
-        width: 100%;
+    .send-emali-panel {
         display: flex;
+        width: 100%;
         justify-content: space-between;
 
-        .send-email-btn {
+        .send-mail-btn {
             margin-left: 5px;
         }
     }

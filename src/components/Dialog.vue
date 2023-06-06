@@ -1,8 +1,7 @@
 <template>
     <div>
-        <!--class="cust-dialog" -->
-        <el-dialog :title="title" :model-value="show" :width="width" :show-close="showClose" draggable
-            :close-on-click-modal="false" class="cust-dialog" :top="top" @close="close">
+        <el-dialog :model-value="show" :show-close="showClose" :draggable="true" :close-on-click-modal="false"
+            :title="title" class="cust-dialog" :width="width" :top="top" @close="close">
             <div class="dialog-body">
                 <slot></slot>
             </div>
@@ -15,10 +14,9 @@
                 </div>
             </template>
         </el-dialog>
-
     </div>
 </template>
-
+  
 <script setup>
 const props = defineProps({
     show: {
@@ -26,7 +24,7 @@ const props = defineProps({
         default: true,
     },
     title: {
-        typeof: "string",
+        type: String,
         default: "标题",
     },
     showClose: {
@@ -39,7 +37,7 @@ const props = defineProps({
     },
     top: {
         type: String,
-        default: "50px",
+        default: "30px",
     },
     buttons: {
         type: Array,
@@ -47,22 +45,21 @@ const props = defineProps({
     showCancel: {
         type: Boolean,
         default: true,
-    }
-})
+    },
+});
 
-const emit = defineEmits()
+const emit = defineEmits();
 const close = () => {
     emit("close");
-}
-
+};
 </script>
-
+  
 <style lang="scss">
 .cust-dialog {
-    margin-bottom: 10px !important;
+    margin-bottom: 10px;
 
     .el-dialog__body {
-        padding: 0px !important;
+        padding: 0px;
     }
 
     .dialog-body {
@@ -70,7 +67,7 @@ const close = () => {
         border-bottom: 1px solid #ddd;
         padding: 15px;
         min-height: 100px;
-        max-height: calc(100vh - 100px);
+        max-height: calc(100vh - 190px);
         overflow: auto;
     }
 

@@ -1,6 +1,6 @@
 <template>
     <div class="container-body article-list-body" :style="{ width: proxy.globalInfo.bodyWidth + 'px' }">
-        <!-- 二级板块 -->
+        <!--二级板块信息-->
         <div class="sub-board" v-if="pBoardId">
             <span :class="['board-item', boardId == 0 ? 'active' : '']">
                 <router-link :to="`/forum/${pBoardId}`">全部</router-link></span>
@@ -12,102 +12,126 @@
         </div>
         <div class="article-panel">
             <div class="top-tab">
-                <div :class="['tab', orderType == 0 ? 'active' : '']" @click="changeOrderType(0)">热榜</div>
-                <el-divider direction="vertical" />
-                <div :class="['tab', orderType == 1 ? 'active' : '']" @click="changeOrderType(1)">发布时间</div>
-                <el-divider direction="vertical" />
-                <div :class="['tab', orderType == 2 ? 'active' : '']" @click="changeOrderType(2)">最新</div>
+                <div :class="['tab', orderType == 0 ? 'active' : '']" @click="changeOrderType(0)">
+                    热榜
+                </div>
+                <el-divider direction="vertical"></el-divider>
+                <div :class="['tab', orderType == 1 ? 'active' : '']" @click="changeOrderType(1)">
+                    发布时间
+                </div>
+                <el-divider direction="vertical"></el-divider>
+                <div :class="['tab', orderType == 2 ? 'active' : '']" @click="changeOrderType(2)">
+                    最新
+                </div>
             </div>
             <div class="article-list">
-                <DataList :dataSource="articleListInfo" @loadData="loadArticle" :loading="loading"
-                    noDataMsg="没有发现文章，赶紧来发布吧！">
+                <DataList :loading="loading" :dataSource="articleListInfo" @loadData="loadArticle"
+                    noDataMsg="没有发现帖子，赶紧发布一个吧">
                     <template #default="{ data }">
-                        <ArticleListItem :data="data"></ArticleListItem>
+                        <ArticleListItem :data="data" :showComment="showComment"></ArticleListItem>
                     </template>
                 </DataList>
             </div>
         </div>
     </div>
 </template>
-
+  
 <script setup>
-import { ref, reactive, getCurrentInstance, watch } from "vue";
-import { useRouter } from "vue-router";
-import { useRoute } from "vue-router";
-import { useStore } from "vuex"
-import ArticleListItem from "./ArticleListItem.vue"
-// import { loadArticleList } from "@/utils/Api.js"
+import ArticleListItem from "./ArticleListItem.vue";
+import { ref, reactive, getCurrentInstance, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
 
 const api = {
-    loadArticle: '/forum/loadArticle',
-}
+    loadArticle: "/forum/loadArticle",
+};
 
 const changeOrderType = (type) => {
-    orderType.value = type
-    loadArticle()
-}
+    orderType.value = type;
+    loadArticle();
+};
 
-// 文章列表
-// 一级板块
-const pBoardId = ref(0)
-// 二级板块
-const boardId = ref(0)
-const loading = ref(false)
-const orderType = ref(0)  // 0 热门  1 时间  2 最新
-const articleListInfo = ref({})
-
+//文章列表
+//一级板块
+const pBoardId = ref(0);
+//二级板块
+const boardId = ref(0);
+const orderType = ref(0);
+const loading = ref(false);
+const articleListInfo = ref({});
 const loadArticle = async () => {
-    loading.value = true
+    loading.value = true;
     let params = {
         pageNo: articleListInfo.value.pageNo,
         pBoardId: pBoardId.value,
         boardId: boardId.value,
-        orderType: orderType.value
-    }
+        orderType: orderType.value,
+    };
     let result = await proxy.Request({
         url: api.loadArticle,
         params: params,
-        showLoading: false
-    })
-    // let result = await loadArticleList(params)
-    loading.value = false
-    if (!result) return;
-    articleListInfo.value = result.data
-    // articleListInfo.value.list = []  // 测试暂无数据的显示
-}
+        showLoading: false,
+    });
+    loading.value = false;
+    if (!result) {
+        return;
+    }
+    articleListInfo.value = result.data;
+};
 
-// loadArticle()  // 通过路由监听去请求数据，此处可注释掉
- 
-// 二级板块
-const subBoardList = ref([])
+//二级板块
+const subBoardList = ref([]);
 const setSubBoard = () => {
-    subBoardList.value = store.getters.getSubBoardList(pBoardId.value)
-}
-
-// 监听路由变化
-watch(() => route.params, (newVal, oldVal) => {
-    pBoardId.value = newVal.pBoardId
-    boardId.value = newVal.boardId || 0
-    setSubBoard()
-    loadArticle()
-    store.commit('setActivePBoardId', newVal.pBoardId)
-    store.commit('setActiveBoardId', newVal.boardId)
-}, { immediate: true, deep: true });
-
-// 监听板块数据变化
-watch(() => store.state.subBoardList,
+    subBoardList.value = store.getters.getSubBoardList(pBoardId.value);
+};
+//监听路由变化
+watch(
+    () => route.params,
     (newVal, oldVal) => {
-        setSubBoard()
-    }, { immediate: true, deep: true });
+        if (
+            Object.keys(newVal).length != 0 &&
+            !newVal.pBoardId &&
+            !newVal.boardId
+        ) {
+            return;
+        }
+        pBoardId.value = newVal.pBoardId;
+        boardId.value = newVal.boardId || 0;
+        setSubBoard();
+        loadArticle();
+        store.commit("setActivePboardId", newVal.pBoardId);
+        store.commit("setActiveBoardId", newVal.boardId);
+    },
+    { immediate: true, deep: true }
+);
+
+//监听 板块数据变化
+watch(
+    () => store.state.boardList,
+    (newVal, oldVal) => {
+        setSubBoard();
+    },
+    { immediate: true, deep: true }
+);
+
+const showComment = ref(false);
+watch(
+    () => store.state.sysSetting,
+    (newVal, oldVal) => {
+        if (newVal) {
+            showComment.value = newVal.commentOpen;
+        }
+    },
+    { immediate: true, deep: true }
+);
 </script>
-
-<style lang="scss" scoped>
+  
+<style lang="scss">
 .article-list-body {
-
     .sub-board {
         padding: 10px 0px 12px 0px;
 
@@ -141,7 +165,7 @@ watch(() => store.state.subBoardList,
         .top-tab {
             display: flex;
             align-items: center;
-            padding: 10px;
+            padding: 10px 15px;
             font-size: 15px;
             border-bottom: 1px solid #ddd;
 
